@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>RREF Calculator</title>
+  <link rel="stylesheet" type="text/css" href="style.css">
+  <link rel="icon" href="favicon.ico" type="image/favicon.ico">
+
+</head>
+<body>
+  <div class="container">
+    <h1>RREF Calculator</h1>
+    <div class="input">
+      <label for="rows">Number of rows:</label>
+      <input type="number" id="rows" min="1" max="10" value="3">
+      <label for="cols">Number of columns:</label>
+      <input type="number" id="cols" min="1" max="10" value="3">
+      <button onclick="createMatrix()">Create Matrix</button>
+      <div id="matrixContainer"></div>
+    </div>
+    <div class="buttons">
+      <button onclick="calculateRREF()">Calculate RREF</button>
+      <button onclick="clearMatrix()">Clear</button>
+    </div>
+    <div class="output">
+      <label for="result">Result:</label>
+      <textarea id="result" rows="4" cols="40" readonly></textarea>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+  <script>
+    function createMatrix() {
+      var rows = parseInt(document.getElementById("rows").value);
+      var cols = parseInt(document.getElementById("cols").value);
+
+      var matrixContainer = document.getElementById("matrixContainer");
+      matrixContainer.innerHTML = "";
+
+      var table = document.createElement("table");
+      table.className = "matrix-table";
+
+      for (var i = 0; i < rows; i++) {
+        var row = document.createElement("tr");
+
+        for (var j = 0; j < cols; j++) {
+          var cell = document.createElement("td");
+          var input = document.createElement("input");
+          input.type = "number";
+          input.className = "matrix-input";
+          cell.appendChild(input);
+          row.appendChild(cell);
+        }
+
+        table.appendChild(row);
+      }
+
+      matrixContainer.appendChild(table);
+      matrixContainer.dataset.rows = rows;
+      matrixContainer.dataset.cols = cols;
+    }
+
+    function getMatrixFromInputs() {
+      var matrixContainer = document.getElementById("matrixContainer");
+      var rows = parseInt(matrixContainer.dataset.rows);
+      var cols = parseInt(matrixContainer.dataset.cols);
+      var matrix = [];
+
+      var inputs = matrixContainer.getElementsByClassName("matrix-input");
+      var inputIndex = 0;
+
+      for (var i = 0; i < rows; i++) {
+        var row = [];
+
+        for (var j = 0; j < cols; j++) {
+          var inputValue = Number(inputs[inputIndex].value);
+          row.push(isNaN(inputValue) ? 0 : inputValue);
+          inputIndex++;
+        }
+
+        matrix.push(row);
+      }
+
+      return matrix;
+    }
+
+    function calculateRREF() {
+      var matrix = getMatrixFromInputs();
+
+      if (validateMatrix(matrix)) {
+        var rref = calculateRREFMatrix(matrix);
+        displayResult(rref);
+      } else {
+        displayResult("Invalid matrix format.");
+      }
+    }
+
+    function validateMatrix(matrix) {
+      var numRows = matrix.length;
+      var numCols = matrix[0].length;
+
+      for (var i = 1; i < numRows; i++) {
+        if (matrix[i].length !== numCols) {
+          return false; // Rows have different number of columns
+        }
+      }
+
+      return true;
+    }
+
+    function calculateRREFMatrix(matrix) {
+      var numPivotRows = 0;
+      var numPivotColumns = 0;
+      var numRows = matrix.length;
+      var numCols = matrix[0].length;
+
+      for (var col = 0; col < numCols; col++) {
+        if (numPivotRows >= numRows) {
+          break;
+        }
+
+        var pivotRow = numPivotRows;
+
+        for (var row = numPivotRows + 1; row < numRows; row++) {
+          if (Math.abs(matrix[row][col]) > Math.abs(matrix[pivotRow][col])) {
+            pivotRow = row;
+          }
+        }
+
+        if (Math.abs(matrix[pivotRow][col]) < Number.EPSILON) {
+          continue;
+        }
+
+        var temp = matrix[numPivotRows];
+        matrix[numPivotRows] = matrix[pivotRow];
+        matrix[pivotRow] = temp;
+
+        var pivotValue = matrix[numPivotRows][col];
+        for (var j = 0; j < numCols; j++) {
+          matrix[numPivotRows][j] /= pivotValue;
+        }
+
+        for (var row = 0; row < numRows; row++) {
+          if (row !== numPivotRows) {
+            var factor = matrix[row][col];
+            for (var j = 0; j < numCols; j++) {
+              matrix[row][j] -= factor * matrix[numPivotRows][j];
+            }
+          }
+        }
+
+        numPivotRows++;
+        numPivotColumns++;
+      }
+
+      return matrix;
+    }
+
+    function displayResult(result) {
+      var resultTextarea = document.getElementById("result");
+
+      if (typeof result === "string") {
+        resultTextarea.value = result;
+      } else {
+        var resultStr = matrixToString(result);
+        resultTextarea.value = resultStr;
+      }
+    }
+
+    function matrixToString(matrix) {
+      var result = "";
+
+      for (var i = 0; i < matrix.length; i++) {
+        result += matrix[i].join("\t") + "\n";
+      }
+
+      return result.trim();
+    }
+
+    function clearMatrix() {
+      var matrixContainer = document.getElementById("matrixContainer");
+      matrixContainer.innerHTML = "";
+      document.getElementById("result").value = "";
+    }
+  </script>
+</body>
+</html>
