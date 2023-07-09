@@ -14,7 +14,7 @@ The RREF Calculator is a web application that performs the Reduced Row Echelon F
 
 To run the RREF Calculator locally, follow these steps:
 
-1. Clone the repository: `git clone https://github.com/your-username/rref-calculator.git`
+1. Clone the repository
 2. Open the index.html file in a web browser.
 3. Use the input fields to specify the size of the matrix and input values.
 4. Click the "Create Matrix" button to generate the matrix.
